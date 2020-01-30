@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node
+  namespace: testing
+  labels:
+    app: node-app
+spec:
+  selector:
+    matchLabels:
+      app: node-app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: node-app
+    spec:
+      containers:
+      - name: application
+        image: mohammadakram077/node-kubernetes:v3
+        env:
+        - name: "MYSQL_DATABASE"
+          valueFrom:
+            secretKeyRef:
+              name: node-secret
+              key: mysql_db
+        - name: "MYSQL_HOST"
+          valueFrom:
+            secretKeyRef:
+              name: node-secret
+              key: mysql_host
+        - name: "MYSQL_PASSWORD"
+          valueFrom:
+            secretKeyRef:
+              name: node-secret
+              key: mysql_pwd
+        - name: "MYSQL_USER"
+          valueFrom:
+            secretKeyRef:
+              name: node-secret
+              key: mysql_user
+        - name: "MYSQl_PORT"
+          valueFrom:
+            secretKeyRef:
+              name: node-secret
+              key: mysql_port
+        - name: "PORT"
+          valueFrom:
+            secretKeyRef:
+              name: node-secret
+              key: port
+        - name: "REDIS_HOST"
+          valueFrom:
+            secretKeyRef:
+              name: node-secret
+              key: redis_host
+        - name: "REDIS_PORT"
+          valueFrom:
+            secretKeyRef:
+              name: node-secret
+              key: redis_port
+        ports:
+        - containerPort: 8080
+      - name: cache
+        image: redis 
+        ports:
+        - containerPort: 6379
+      - name: storage
+        image: mohammadakram077/database-kubernetes
+        env:
+        - name: "DATABASE_HOST"
+          valueFrom:
+            secretKeyRef:
+              name: node-secret
+              key: mysql_host
+        - name: "MYSQL_ALLOW_EMPTY_PASSWORD"
+          valueFrom:
+            secretKeyRef:
+              name: node-secret
+              key: mysql_empty_pwd
+        - name: "MYSQL_DATABASE"
+          valueFrom:
+            secretKeyRef:
+              name: node-secret
+              key: mysql_db
+        - name: "MYSQL_PASSWORD"
+          valueFrom:
+            secretKeyRef:
+              name: node-secret
+              key: mysql_pwd
+        - name: "MYSQL_USER"
+          valueFrom:
+            secretKeyRef:
+              name: node-secret
+              key: mysql_user
+        ports:
+        - containerPort: 3306
+      restartPolicy: Always
